@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backup-check
+  namespace: esb
+spec:
+  restartPolicy: Never
+  containers:
+  - name: check
+    image: busybox
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - name: backup
+      mountPath: /backup
+  volumes:
+  - name: backup
+    persistentVolumeClaim:
+      claimName: mongodb-backup-pvc
+

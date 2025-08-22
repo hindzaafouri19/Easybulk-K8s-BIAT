@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: back
+  namespace: esb
+  labels:
+    app: esb-back
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: esb-back
+  template:
+    metadata:
+      labels:
+        app: esb-back
+    spec:
+      containers:
+      - name: back
+        image: registry.tritux.com/easybulk3/back:v3.0.5
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9000
+        envFrom:
+        - configMapRef:
+            name: esb-back-env 
+        - secretRef:
+            name: esb-back-secret
+        volumeMounts:
+        - name: backend-volume
+          mountPath: /ebs-back
+        - name: files-volume
+          mountPath: /data
+        - name: init-volume
+          mountPath: /init
+          subPath: SmartSms.postman_collection.json
+      volumes:
+      - name: backend-volume
+        hostPath:
+          path: /mnt/nfs-share/back/backend 
+          type: Directory
+      - name: files-volume
+        hostPath:
+          path: /mnt/nfs-share/back/files
+          type: Directory
+      - name: init-volume
+        hostPath:
+          path: /mnt/nfs-share/back/init  
+          type: Directory
+      imagePullSecrets:
+        - name: docker-registry-secret

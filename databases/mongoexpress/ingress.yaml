@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mongo-express-ingress
+  namespace: esb
+spec:
+  ingressClassName: caddy
+  tls:
+    - hosts:
+        - mongox.easybulk.intra
+      secretName: mycerts-caddy
+  rules:
+    - host: mongox.easybulk.intra
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mongo-express
+                port:
+                  number: 80
+

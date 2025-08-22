@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sqlbox-config
+  namespace: esb
+data:
+  sqlbox.conf: |
+    group = sqlbox
+    id = sqlbox-db
+    smsbox-id = smsbox
+    smsbox-port = 13010
+    bearerbox-host = bearerbox.esb.svc.cluster.local
+    bearerbox-port = 13001
+    sql-log-table = sent_sms
+    sql-insert-table = send_sms
+    log-file = "/var/log/kannel/sqlbox.log"
+    log-level = 0
+
+    group = mysql-connection
+    id = sqlbox-db
+    host = proxysql.esb.svc.cluster.local
+    port = 6033
+    username = "ebs-app"
+    password = "root1"
+    database = "easybulk"
+

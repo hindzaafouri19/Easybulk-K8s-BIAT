@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-auth
+  namespace: esb
+data:
+  KC_HOSTNAME_STRICT_HTTPS: "false"
+  KC_PROXY_ADDRESS_FORWARDING: "true"
+  KC_HTTP_ENABLED: "true"
+  KC_LOG_LEVEL: "INFO"
+  TZ: "Africa/Tunis"
+  JAVA_OPTS_APPEND: "-Dkeycloak.profile.feature.token_exchange=enabled -Dkeycloak.profile=preview -Djboss.node.name=ebs-auth-node-1"
+  KEYCLOAK_PROFILE: "preview"
+  KEYCLOAK_FEATURES: "token-exchange"
+  KEYCLOAK_EXTRA_ARGS_PREPENDED: "--spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true"
+  KC_SPI_CONNECTIONS_HTTP_CLIENT_DEFAULT_DISABLE_TRUST_MANAGER: "true"
+  #KEYCLOAK_ADMIN: "ebs-superadmin"
+  #KEYCLOAK_ADMIN_PASSWORD: "admin"
+  KC_DB_URL: "jdbc:mysql://mysql.esb.svc.cluster.local:6446/easybulk_auth"
+  KC_DB: "mysql"
+  SERVER_URI: "http://esb-back.esb.svc.cluster.local:9000/v1"
+  GET_ORGANISATION_URI: "/user/find-organizations"
+  ACTIVATION_ENDPOINT: "/user/inviter-user"
+  KC_HOSTNAME: "app.easybulk.intra"
+  KC_HOSTNAME_ADMIN_URL: "https://app.easybulk.intra/auth"
+  KC_PROXY: "edge"
+  KC_HOSTNAME_STRICT: "true"
+
+
+  QUARKUS_HTTP_ACCESS_LOG_ENABLED: "true"
+  QUARKUS_HTTP_ACCESS_LOG_PATTERN: "%h %l %u %r %s %b %t \"%{i,Referer}\" \"%{i,User-Agent}\""
+

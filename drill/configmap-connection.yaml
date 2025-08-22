@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: drill-connection-conf
+  namespace: esb
+data:
+  storage-plugins-override.conf: |
+    {
+      "storage": {
+        "mongo" : {
+          "type": "mongo",
+          # "connection": "mongodb://doc-db:27017/",
+          "connection": "mongodb://mongodb:mongodb@mongodb-svc.esb.svc.cluster.local/easybulk?authSource=easybulk&replicaSet=mongodb&ssl=false",
+          "enabled": true,
+          "batchSize": 1000
+        }
+      }
+    }
+

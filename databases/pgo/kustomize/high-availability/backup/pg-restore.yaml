@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pg-restore-temp
+  namespace: esb
+spec:
+  restartPolicy: Never
+  containers:
+    - name: pgbackrest
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi9-2.54.2-2520
+      command: ["/bin/bash", "-c"]
+      args:
+        - pgbackrest --stanza=db --pg1-path=/pgdata/pg17 --repo1-path=/pgbackrest/repo1 --type=default restore
+      volumeMounts:
+        - name: pgdata
+          mountPath: /pgdata/pg17
+        - name: pgbackrest
+          mountPath: /pgbackrest
+  volumes:
+    - name: pgdata
+      persistentVolumeClaim:
+        claimName: pg-restore-pvc  # empty PVC
+    - name: pgbackrest
+      persistentVolumeClaim:
+        claimName: postgres-repo1  # repo1 PVC
+

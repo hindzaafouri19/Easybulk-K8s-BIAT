@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: phpmyadmin-ingress
+  namespace: esb
+spec:
+  ingressClassName: caddy
+  tls:
+    - hosts:
+        - pma.easybulk.intra
+      secretName: mycerts-caddy  
+  rules:
+    - host: pma.easybulk.intra
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: phpmyadmin
+                port:
+                  number: 80
+

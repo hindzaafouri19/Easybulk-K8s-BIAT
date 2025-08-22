@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: centrifugo-env
+  namespace: esb
+data:
+  CENTRIFUGO_HOST: "https://ws.easybulk.intra"
+  CENTRIFUGO_POST_API: "/api/publish"
+

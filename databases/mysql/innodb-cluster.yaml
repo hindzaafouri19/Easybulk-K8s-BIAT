@@ -1,0 +1,23 @@
+apiVersion: mysql.oracle.com/v2
+kind: InnoDBCluster
+metadata:
+  name: mysql
+  namespace: esb
+spec:
+  secretName: mysql-root-user
+  tlsUseSelfSigned: true
+  instances: 3
+  datadirVolumeClaimTemplate:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+    storageClassName: nfs-client
+
+  podSpec:
+    restartPolicy: Always
+
+  router:
+    instances: 1
+

@@ -1,0 +1,19 @@
+# Source: caddy-ingress-controller/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: caddy-ingress-controller-configmap
+  namespace: esb
+data:
+  acmeCA: ""
+  acmeEABKeyId: ""
+  acmeEABMacKey: ""
+  debug: "true"
+  email: ""
+  experimentalSmartSort: "false"
+  metrics: "true"
+  onDemandTLS: "false"
+  proxyProtocol: "false"
+  automaticHttps: "false"
+  QUARKUS_HTTP_ACCESS_LOG_ENABLED: "true"
+  QUARKUS_HTTP_ACCESS_LOG_PATTERN: "%h %l %u %r %s %b %t \"%{i,Referer}\" \"%{i,User-Agent}\""

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: esb-back
+  namespace: esb 
+spec:
+  selector:
+    app: esb-back   
+  ports:
+    - protocol: TCP
+      port: 9000      
+      targetPort: 9000 
+

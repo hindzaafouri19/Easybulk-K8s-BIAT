@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: airflow-webserver-ingress
+  namespace: esb
+spec:
+  ingressClassName: caddy
+  rules:
+    - host: airflow.easybulk.intra
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webserver
+                port:
+                  number: 7071
+  tls:
+    - hosts:
+        - airflow.easybulk.intra
+      secretName: mycerts-caddy
+

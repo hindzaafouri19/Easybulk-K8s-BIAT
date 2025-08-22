@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongodb-backup-test
+  namespace: esb
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: mongodump
+        image: docker.io/library/mongo:5.0
+        command:
+          - /bin/sh
+          - -c
+          - |
+            env HOME=/tmp mongodump \
+              -h mongodb-0.mongodb-svc.esb.svc.cluster.local \
+              -u admin -p mongodb \
+              --authenticationDatabase admin \
+              --out /backup/$(date +%F)
+        volumeMounts:
+        - name: backup-storage
+          mountPath: /backup
+      volumes:
+      - name: backup-storage
+        persistentVolumeClaim:
+          claimName: mongodb-backup-pvc
+

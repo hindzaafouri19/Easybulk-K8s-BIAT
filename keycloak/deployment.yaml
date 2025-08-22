@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak-auth
+  namespace: esb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak-auth
+  template:
+    metadata:
+      labels:
+        app: keycloak-auth
+    spec:
+      imagePullSecrets:
+        - name: docker-registry-secret
+      containers:
+        - name: auth
+          image: registry.tritux.com/easybulk3/keycloak:v3.0.0
+          imagePullPolicy: Always
+          args: 
+          - "start-dev"
+          - "--features=docker,token-exchange"
+          - "--http-relative-path=/auth"  
+          - "--spi-theme-cache-themes=false --spi-theme-cache-templates=false"
+          - "--import-realm"
+          - "--spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true"
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: keycloak-auth
+            - secretRef:
+                name: keycloak-secret
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import/ebs-realm.json
+              subPath: ebs-realm.json
+      volumes:
+        - name: realm-config
+          configMap:
+            name: keycloak-realm
+
+
+          #env: 
+          #  - name: KC_DB_USERNAME
+          #    valueFrom:
+          #      secretKeyRef:
+          #        name: keycloak-db-secret
+          #        key: KC_DB_USERNAME
+          #  - name: KC_DB_PASSWORD
+          #    valueFrom:
+          #      secretKeyRef:
+          #        name: keycloak-db-secret
+          #        key: KC_DB_PASSWORD

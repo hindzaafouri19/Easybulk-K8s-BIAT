@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drill
+  namespace: esb
+  labels:
+    app: drill
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drill
+  template:
+    metadata:
+      labels:
+        app: drill
+    spec:
+      imagePullSecrets:
+        - name: docker-registry-secret
+      containers:
+      - name: drill
+        image: registry.tritux.com/easybulk3/drill:v3.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8047
+          name: http
+        stdin: true
+        tty: true
+        volumeMounts:
+        - name: drill-connection-conf
+          mountPath: /opt/drill/conf/storage-plugins-override.conf
+          subPath: storage-plugins-override.conf
+        - name: drill-override-conf
+          mountPath: /opt/drill/conf/drill-override.conf
+          subPath: drill-override.conf
+      volumes:
+      - name: drill-connection-conf
+        configMap:
+          name: drill-connection-conf
+      - name: drill-override-conf
+        configMap:
+          name: drill-override-conf  
+

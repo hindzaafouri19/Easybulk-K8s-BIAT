@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-webserver
+  namespace: esb
+  labels:
+    app: webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webserver
+  template:
+    metadata:
+      labels:
+        app: webserver
+    spec:
+      serviceAccountName: airflow-sa
+      initContainers:
+        - name: fix-log-permissions
+          image: busybox
+          command: ["sh", "-c", "mkdir -p /opt/airflow/logs/scheduler && chown -R 1000:1000 /opt/airflow/logs && chmod -R 755 /opt/airflow/logs"]
+          volumeMounts:
+            - name: airflow-logs
+              mountPath: /opt/airflow/logs
+      containers:
+        - name: webserver-pod
+          image: registry.tritux.com/easybulk3/airflow:v3.0.2
+          imagePullPolicy: Always
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              airflow db upgrade &&
+              airflow users create --username admin --password admin
+              --firstname Admin --lastname admin --role Admin
+              --email admin@example.com &&
+              airflow webserver
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          envFrom:
+            - configMapRef:
+                name: airflow-variables
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pguser-airflowuser
+                  key: dbname
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pguser-airflowuser
+                  key: user
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pguser-airflowuser
+                  key: host
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pguser-airflowuser
+                  key: password
+          # - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+          #    value: "postgresql+psycopg2://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-ha.esb.svc.cluster.local:5432/airflow"
+          #  - name: AIRFLOW_CONN_METADATA_DB
+          #    value: "db+postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-ha.esb.svc.cluster.local:5432/airflow"
+          volumeMounts:
+            - name: shared-data
+              mountPath: /data
+            - name: airflow-logs
+              mountPath: /opt/airflow/logs
+      volumes:
+        - name: shared-data
+          hostPath:
+            path: /mnt/nfs-share/back/files
+            type: Directory
+        - name: airflow-logs
+          hostPath:
+            path: /mnt/nfs-share/airflow/logs
+            type: Directory
+      imagePullSecrets:
+        - name: docker-registry-secret
+

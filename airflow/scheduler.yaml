@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-scheduler
+  namespace: esb
+  labels:
+    app: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduler
+  template:
+    metadata:
+      labels:
+        app: scheduler
+    spec:
+      serviceAccountName: airflow-sa
+      containers:
+        - name: scheduler-pod
+          image: registry.tritux.com/easybulk3/airflow:v3.0.2
+          imagePullPolicy: Always
+          command: ["/bin/sh" , "-c"]
+          args:
+            - echo "Starting - airflow scheduler";
+              airflow scheduler;
+          envFrom:       
+            - configMapRef:
+                name: airflow-variables
+          env:
+            - name: AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF
+              value: airflow-variables
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pguser-airflowuser
+                  key: dbname
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pguser-airflowuser
+                  key: user
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pguser-airflowuser
+                  key: host
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pguser-airflowuser
+                  key: password
+          volumeMounts:
+            - name: shared-data
+              mountPath: /data
+      volumes:
+        - name: shared-data
+          hostPath:
+            path:  /mnt/nfs-share/airflow/files
+            type: Directory
+      imagePullSecrets:
+        - name: docker-registry-secret
+

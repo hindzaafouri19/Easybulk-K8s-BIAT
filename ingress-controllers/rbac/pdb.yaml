@@ -1,0 +1,18 @@
+# Source: caddy-ingress-controller/templates/poddisruptionbudget.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mycaddy-caddy-ingress-controller
+  namespace: esb
+  labels:
+    helm.sh/chart: caddy-ingress-controller-1.3.0
+    app.kubernetes.io/name: caddy-ingress-controller
+    app.kubernetes.io/instance: mycaddy
+    app.kubernetes.io/version: "v0.2.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: caddy-ingress-controller
+      app.kubernetes.io/instance: mycaddy

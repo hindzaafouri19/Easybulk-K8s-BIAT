@@ -1,0 +1,58 @@
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: mongodb
+  namespace: esb
+spec:
+  members: 3
+  type: ReplicaSet
+  version: "5.0.0"
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  users:
+    - name: admin
+      db: admin
+      passwordSecretRef:
+        name: mongodb-user-password
+      scramCredentialsSecretName: admin-scram
+      roles:
+        - name: clusterAdmin
+          db: admin
+        - name: userAdminAnyDatabase
+          db: admin
+        - name: readWriteAnyDatabase
+          db: admin
+    - name: mongodb
+      db: easybulk
+      passwordSecretRef:
+        name: mongodb-user-password
+      scramCredentialsSecretName: easybulk-scram
+      roles:
+        - name: clusterAdmin
+          db: easybulk
+        - name: userAdminAnyDatabase
+          db: easybulk
+        - name: readWrite
+          db: easybulk
+            
+  statefulSet:
+    spec:
+      serviceName: mongodb-svc
+      volumeClaimTemplates:
+        - metadata:
+            name: data-volume
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            storageClassName: nfs-client
+            resources:
+              requests:
+                storage: 3Gi
+        - metadata:
+            name: logs-volume
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            storageClassName: nfs-client
+            resources:
+              requests:
+                storage: 1Gi

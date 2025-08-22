@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smppsim
+  namespace: esb
+  labels:
+    app: smppsim
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smppsim
+  template:
+    metadata:
+      labels:
+        app: smppsim
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      imagePullSecrets:
+      - name: docker-registry-secret
+      containers:
+      - name: smppsim
+        image: registry.tritux.com/easybulk3/smppsim:v3.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 88
+          name: http
+        - containerPort: 2775
+          name: smpp
+        volumeMounts:
+        - name: smppsim-logs
+          mountPath: /opt/local/smppsim/log
+      volumes: 
+      - name: smppsim-logs
+        hostPath:
+          path: /mnt/nfs-share/kannel/smppsim/logs
+          type: Directory
+

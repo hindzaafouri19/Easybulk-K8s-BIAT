@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: drill-override-conf
+  namespace: esb
+data:
+  drill-override.conf: |
+    drill.exec: {
+      cluster-id: "drillbits1",
+      zk.connect: "localhost:2181",
+    }
+
+    drill.exec.options: {
+      exec.enable_union_type: true
+      drill.exec.http.rest.errors.verbose: true
+    }
+

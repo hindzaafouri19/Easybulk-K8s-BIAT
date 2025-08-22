@@ -1,0 +1,23 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PGAdmin
+metadata:
+  name: pgadmin
+  namespace: esb
+spec:
+  users:
+  - username: pgadmin@esb.com
+    role: Administrator
+    passwordRef:
+      name: pgadmin-password-secret
+      key: pgadmin-password
+  dataVolumeClaimSpec:
+    accessModes:
+    - "ReadWriteOnce"
+    storageClassName: nfs-client
+    resources:
+      requests:
+        storage: 1Gi
+  serverGroups:
+  - name: supply
+    postgresClusterSelector: {}
+

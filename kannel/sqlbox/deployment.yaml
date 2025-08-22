@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sqlbox
+  namespace: esb
+  labels:
+    app: sqlbox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sqlbox
+  template:
+    metadata:
+      labels:
+        app: sqlbox
+    spec:
+      imagePullSecrets:
+        - name: docker-registry-secret
+      containers:
+      - name: sqlbox
+        image: registry.tritux.com/easybulk3/sqlbox:v3.0.0
+        imagePullPolicy: Always
+        command: ["sqlbox", "/etc/kannel/sqlbox.conf"]
+        volumeMounts:
+          - name: logs-volume
+            mountPath: /var/log/kannel
+          - name: config-volume
+            mountPath: /etc/kannel/sqlbox.conf
+            subPath: sqlbox.conf
+        securityContext:
+          privileged: true
+      volumes:
+        - name: logs-volume
+          hostPath:
+            path: /mnt/nfs-share/kannel/sqlbox/logs
+            type: Directory
+        - name: config-volume
+          configMap:
+            name: sqlbox-config
+            items:
+              - key: sqlbox.conf
+                path: sqlbox.conf
+

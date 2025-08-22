@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smppsim
+  namespace: esb
+  labels:
+    app: smppsim
+spec:
+  selector:
+    app: smppsim
+  ports:
+  - name: http
+    port: 88
+    targetPort: 88
+    protocol: TCP
+  - name: smpp
+    port: 2775
+    targetPort: 2775
+    protocol: TCP
+  type: ClusterIP
+

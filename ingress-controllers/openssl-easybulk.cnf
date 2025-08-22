@@ -1,0 +1,32 @@
+[ req ]
+default_bits       = 2048
+prompt             = no
+default_md         = sha256
+distinguished_name = dn
+x509_extensions    = req_ext
+
+[ dn ]
+C  = FR
+ST = Paris
+L  = Paris
+O  = EasyBulk
+OU = IT
+CN = app.easybulk.intra
+
+[ req_ext ]
+basicConstraints       = CA:FALSE
+keyUsage               = digitalSignature, keyEncipherment
+extendedKeyUsage       = serverAuth
+subjectAltName         = @alt_names
+
+[ alt_names ]
+DNS.1 = app.easybulk.intra
+DNS.2 = airflow.easybulk.intra
+DNS.3 = pgadmin.easybulk.intra
+DNS.4 = analytics.easybulk.intra
+DNS.5 = ws.easybulk.intra
+DNS.6 = pma.easybulk.intra
+DNS.7 = mongox.easybulk.intra
+DNS.8 = backct.easybulk.intra
+DNS.9 = k8s-dashboard.easybulk.intra
+DNS.10 = zabbix.easybulk.intra

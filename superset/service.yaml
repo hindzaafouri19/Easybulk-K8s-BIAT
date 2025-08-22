@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: superset
+  namespace: esb
+  labels:
+    app: superset
+spec:
+  selector:
+    app: superset
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8088
+

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: back-jolokia
+  namespace: esb
+spec:
+  selector:
+    app: esb-back
+  ports:
+    - name: jolokia
+      protocol: TCP
+      port: 8778
+      targetPort: 8778
+  type: ClusterIP
+

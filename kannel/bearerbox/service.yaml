@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bearerbox
+  namespace: esb
+spec:
+  selector:
+    app: bearerbox
+  ports:
+    - name: sms-port
+      protocol: TCP
+      port: 13000
+      targetPort: 13000
+    - name: admin-port
+      protocol: TCP
+      port: 13001
+      targetPort: 13001
+  type: ClusterIP
+

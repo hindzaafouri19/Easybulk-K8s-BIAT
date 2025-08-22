@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-init-script
+  namespace: esb
+data:
+  init.js: |
+    // Switch to easybulk database
+    db = db.getSiblingDB('easybulk');
+
+    // Create 'campagne' collection and unique index on 'campagne_id'
+    if (!db.getCollectionNames().includes('campagne')) {
+      db.createCollection('campagne');
+      db.campagne.createIndex({ campagne_id: 1 }, { unique: true });
+    }
+
+    // Create 'campagne_progress' collection and unique index on 'campagne_id'
+    if (!db.getCollectionNames().includes('campagne_progress')) {
+      db.createCollection('campagne_progress');
+      db.campagne_progress.createIndex({ campagne_id: 1 }, { unique: true });
+    }
+
+    // Create 'user_contact' collection and index on 'campagne_id'
+    if (!db.getCollectionNames().includes('user_contact')) {
+      db.createCollection('user_contact');
+      db.user_contact.createIndex({ campagne_id: 1 });
+    }
+

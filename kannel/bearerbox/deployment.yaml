@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bearerbox
+  namespace: esb
+  labels:
+    app: bearerbox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bearerbox
+  template:
+    metadata:
+      labels:
+        app: bearerbox
+    spec:
+      imagePullSecrets:
+        - name: docker-registry-secret
+      containers:
+        - name: bearerbox
+          image: registry.tritux.com/easybulk3/bearerbox:v3.0.0
+          imagePullPolicy: Always
+          command: ["bearerbox", "-v", "0", "/etc/kannel/kannel.conf"]
+          ports:
+            - containerPort: 13000
+          volumeMounts:
+            - name: kannel-logs
+              mountPath: /var/log/kannel
+            - name: kannel-store
+              mountPath: /var/spool/kannel-store
+            - name: kannel-dlr
+              mountPath: /var/spool/kannel-dlr
+            - name: config-volume
+              mountPath: /etc/kannel/kannel.conf
+              subPath: kannel.conf
+      volumes:
+        - name: kannel-logs
+          hostPath:
+            path: /mnt/nfs-share/kannel/bearerbox/logs
+            type: Directory
+        - name: kannel-store
+          hostPath:
+            path:  /mnt/nfs-share/kannel/bearerbox/data/kannel/spool/store
+            type: Directory
+        - name: kannel-dlr
+          hostPath:
+            path:  /mnt/nfs-share/kannel/bearerbox/data/kannel/spool/dlr
+            type: Directory
+        - name: config-volume
+          configMap:
+            name: bearerbox-config
+            items:
+              - key: kannel.conf
+                path: kannel.conf
+

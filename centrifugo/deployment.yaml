@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: centrifugo
+  namespace: esb
+  labels:
+    app: centrifugo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: centrifugo
+  template:
+    metadata:
+      labels:
+        app: centrifugo
+    spec:
+      imagePullSecrets:
+        - name: docker-registry-secret
+      containers:
+        - name: centrifugo
+          image: registry.tritux.com/easybulk3/centrifugo:v3.0.0
+          imagePullPolicy: Always
+          command: ["centrifugo", "-c", "/centrifugo/config.json"]
+          envFrom:
+            - configMapRef:
+                name: centrifugo-env
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          volumeMounts:
+            - name: centrifugo-config-volume
+              mountPath: /centrifugo/config
+              readOnly: true
+      restartPolicy: Always
+      volumes:
+        - name: centrifugo-config-volume
+          configMap:
+            name: centrifugo-config
+            items:
+              - key: config.json
+                path: config.json
+

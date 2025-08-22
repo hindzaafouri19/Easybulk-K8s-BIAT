@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongodb-init
+  namespace: esb
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mongo-init
+          image: docker.io/library/mongo:5.0
+          command: ["bash", "-c"]
+          args:
+            - |
+              echo "Waiting for primary election..."
+              PRIMARY_POD=""
+              while [ -z "$PRIMARY_POD" ]; do
+                for POD in mongodb-0.mongodb-svc.esb.svc.cluster.local mongodb-1.mongodb-svc.esb.svc.cluster.local mongodb-2.mongodb-svc.esb.svc.cluster.local; do
+                  echo "Checking pod $POD"
+                  IS_PRIMARY=$(mongo "mongodb://mongodb:mongodb@$POD:27017/admin?authSource=easybulk" --quiet --eval "db.isMaster().ismaster" || echo "false")
+                  if [ "$IS_PRIMARY" = "true" ]; then
+                    PRIMARY_POD=$POD
+                    echo "Primary found at $PRIMARY_POD"
+                    break
+                  fi
+                done
+                if [ -z "$PRIMARY_POD" ]; then
+                  echo "Still waiting for primary..."
+                  sleep 5
+                fi
+              done
+              echo "Running init.js on $PRIMARY_POD..."
+              mongo "mongodb://mongodb:mongodb@$PRIMARY_POD:27017/easybulk?authSource=easybulk" /scripts/init.js
+          volumeMounts:
+            - name: mongo-init
+              mountPath: /scripts
+      volumes:
+        - name: mongo-init
+          configMap:
+            name: mongo-init-script
+

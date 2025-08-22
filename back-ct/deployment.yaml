@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: back-ct-service
+  namespace: esb
+  labels:
+    app: back-ct-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: back-ct-service
+  template:
+    metadata:
+      labels:
+        app: back-ct-service
+    spec:
+      containers:
+        - name: back-ct-service
+          image: registry.tritux.com/easybulk3/ebs-ct-service:v3.0.2
+          ports:
+            - containerPort: 9002
+          envFrom:
+            - configMapRef:
+                name: back-ct-env
+            - secretRef:
+                name: back-ct-secret
+          volumeMounts:
+            - name: back-ct-volume
+              mountPath: /ebs-ct-service
+      volumes:
+        - name: back-ct-volume
+          hostPath:
+            path: /mnt/nfs-share/ebs-ct-service
+            type: Directory
+      imagePullSecrets:
+        - name: docker-registry-secret

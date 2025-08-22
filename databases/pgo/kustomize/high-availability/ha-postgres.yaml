@@ -1,0 +1,63 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: postgres
+spec:
+  users:
+    - name: postgres
+      databases: 
+        - superset
+      options: 'SUPERUSER'
+    - name: airflowuser
+      databases:
+        - airflow
+  postgresVersion: 17
+  dataVolumeClaimDeletePolicy: Retain
+  instances:
+    - name: cluster
+      replicas: 3
+      dataVolumeClaimSpec:
+        storageClassName: "nfs-client"
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 1Gi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  postgres-operator.crunchydata.com/cluster: postgres
+                  postgres-operator.crunchydata.com/instance-set: cluster
+  backups:
+    pgbackrest:
+      restore:
+        enabled: true
+        repoName: repo1
+      repos:
+      - name: repo1
+        volume:
+          volumeClaimSpec:
+            storageClassName: "nfs-client"
+            accessModes:
+            - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 1Gi
+  proxy:
+    pgBouncer:
+      replicas: 2
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  postgres-operator.crunchydata.com/cluster: postgres
+                  postgres-operator.crunchydata.com/role: pgbouncer

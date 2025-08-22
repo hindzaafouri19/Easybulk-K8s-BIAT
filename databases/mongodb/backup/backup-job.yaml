@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongodb-backup
+  namespace: esb
+spec:
+  schedule: "0 2 * * *" 
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: mongodump
+            image: docker.io/library/mongo:5.0
+            command:
+              - /bin/sh
+              - -c
+              - |
+                env HOME=/tmp mongodump \
+                  -h mongodb-0.mongodb-svc.esb.svc.cluster.local \
+                  -u admin -p mongodb \
+                  --authenticationDatabase admin \
+                  --out /backup/$(date +%F)
+            volumeMounts:
+              - name: backup-storage
+                mountPath: /backup
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: mongodb-backup-pvc
+
